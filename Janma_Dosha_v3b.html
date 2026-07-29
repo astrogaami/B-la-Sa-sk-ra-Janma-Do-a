@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="browserTitle">AstroGaami - Vedic Janma & Samskara Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --noble-black: #1a1a1a;
+            --paper-white: #fdfdfb;
+            --gold-leaf: #af935f;
+            --sand: #e8e2d6;
+            --clay: #8d493a;
+            --safe-green: #4a6741;
+            --warn-red: #a34a4a;
+            --mixed-blue: #2c5d87;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f2; color: var(--noble-black); line-height: 1.4; padding: 15px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* UI Styling */
+        .input-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 3px solid var(--gold-leaf); }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        textarea, .settings-input { width: 100%; padding: 10px; border: 1px solid var(--sand); border-radius: 6px; font-size: 13px; background: #fafafa; outline: none; }
+        textarea { height: 120px; font-family: 'Courier New', monospace; }
+        
+        .gender-btn { padding: 8px 16px; border: 1px solid var(--noble-black); background: transparent; cursor: pointer; border-radius: 6px; transition: 0.3s; font-weight: 600; font-size: 13px; }
+        .gender-btn.selected { background: var(--noble-black); color: white; }
+        
+        .btn-primary { background: var(--noble-black); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-gold { background: var(--gold-leaf); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+
+        /* Tables & Status */
+        .tech-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .tech-table th { text-align: left; padding: 8px; background: #f0f0ed; border-bottom: 2px solid var(--gold-leaf); }
+        .tech-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        
+        .status-pill { padding: 3px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; cursor: help; }
+        .bg-good { background: var(--safe-green); }
+        .bg-bad { background: var(--warn-red); }
+        .bg-mixed { background: var(--mixed-blue); }
+
+        /* Report Sections - Compact & Elegant */
+        #printableReport { display: none; background: var(--paper-white); padding: 30px; border: 1px solid #ddd; border-radius: 4px; }
+        .report-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--gold-leaf); padding-bottom: 10px; }
+        .report-header h1 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--clay); margin-bottom: 5px; }
+        .report-header p { font-size: 12px; letter-spacing: 1px; color: var(--gold-leaf); text-transform: uppercase; }
+
+        .section-header { font-family: 'Playfair Display', serif; font-size: 16px; border-bottom: 1px solid var(--sand); margin: 15px 0 10px 0; color: var(--clay); padding-bottom: 3px; }
+        
+        .summary-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; font-size: 12px; background: #fbfbf9; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+        .summary-item strong { color: var(--gold-leaf); display: block; font-size: 10px; text-transform: uppercase; }
+
+        .samskara-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .samskara-card { padding: 12px; border: 1px solid var(--sand); background: white; border-radius: 4px; position: relative; }
+        .samskara-card h4 { font-size: 13px; color: var(--clay); margin-bottom: 4px; border-bottom: 1px solid #f0f0ed; }
+        .samskara-card .age-tag { font-size: 10px; font-weight: 600; color: var(--gold-leaf); }
+        .samskara-card p { font-size: 11px; color: #444; margin-top: 4px; line-height: 1.3; }
+
+        .best-practices { font-size: 11px; background: #fef9f3; padding: 12px; border-left: 3px solid var(--gold-leaf); margin-top: 15px; }
+        
+        .editable { cursor: pointer; border-radius: 2px; }
+        .editable:hover { background: #fffde7; outline: 1px dashed var(--gold-leaf); }
+        .editable:focus { background: white; outline: 2px solid var(--gold-leaf); cursor: text; }
+
+        .sig-box { margin-top: 25px; text-align: right; font-family: 'Playfair Display'; font-size: 18px; color: var(--clay); }
+
+        @media print { 
+            .no-print { display: none !important; } 
+            #printableReport { display: block !important; border: none; padding: 0; width: 100%; box-shadow: none; } 
+            body { padding: 0; background: white; }
+            .samskara-card { break-inside: avoid; }
+            @page { margin: 10mm 12mm; size: A4 portrait; }
+            .report-header { margin-bottom: 10px; padding-bottom: 6px; }
+            .report-header h1 { font-size: 20px; }
+            .section-header { font-size: 13px; margin: 8px 0 6px 0; }
+            .samskara-container { gap: 6px; }
+            .samskara-card { padding: 7px 10px; }
+            .samskara-card h4 { font-size: 12px; }
+            .samskara-card p { font-size: 10px; }
+            .best-practices { padding: 8px 10px; font-size: 10px; margin-top: 8px; }
+            .summary-grid { padding: 7px; gap: 6px; font-size: 11px; }
+            .sig-box { margin-top: 12px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SETTINGS PANEL -->
+    <div class="input-card no-print">
+        <h3 style="font-size: 12px; color: var(--gold-leaf); margin-bottom: 10px;">⚙️ Report Customization</h3>
+        <div class="grid-inputs">
+            <div>
+                <label style="font-size: 10px; font-weight: 600;">Main Report Title</label>
+                <input type="text" id="appTitleInput" class="settings-input" value="Bāla Saṁskāra & Janma Doṣa Guide">
+            </div>
+            <div>
+                <label style="font-size: 10px; font-weight: 600;">Astrologer's Digital Signature</label>
+                <input type="text" id="appSigInput" class="settings-input" value="AstroGaami Jyotiṣa Sevā">
+            </div>
+        </div>
+    </div>
+
+    <div class="input-card no-print">
+        <h2 style="font-family: 'Playfair Display'; font-size: 20px; margin-bottom: 15px;">Vedic Birth Analysis</h2>
+        
+        <div class="grid-inputs">
+            <div><label style="font-size: 11px; font-weight: 600;">Planet Longitudes (A)</label><textarea id="inputA" placeholder="Copy 'Body Longitude' table from JHora here..."></textarea></div>
+            <div><label style="font-size: 11px; font-weight: 600;">Panchanga Data (B)</label><textarea id="inputB" placeholder="Copy 'Date, Tithi, Yoga' details from JHora here..."></textarea></div>
+        </div>
+
+        <div class="grid-inputs">
+            <input type="text" id="childName" placeholder="Enter Child's Name" class="settings-input">
+            <div id="genderContainer" style="display: flex; gap: 10px;">
+                <button class="gender-btn selected" id="btnMale" onclick="setGender('Male')">Raja (Boy)</button>
+                <button class="gender-btn" id="btnFemale" onclick="setGender('Female')">Rani (Girl)</button>
+            </div>
+        </div>
+
+
+
+        <div style="display: flex; gap: 12px; margin-top: 15px;">
+            <button class="btn-primary" onclick="processData()">1. Analyze Data</button>
+            <button class="btn-gold" onclick="generateFinalReport()">2. Create Parent Report</button>
+            <button class="btn-primary" style="background: var(--gold-leaf);" onclick="safePrint()">3. Print / Save PDF</button>
+        </div>
+        <p style="font-size: 10px; color: #888; margin-top: 10px;">*Double-click any text in the final report to manually edit it before printing.</p>
+    </div>
+
+    <!-- Tech Table -->
+    <div id="techSummary" class="input-card no-print" style="display: none;">
+        <h3 style="font-size: 14px; color: var(--clay);">Verification Table (Internal Use)</h3>
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Planet</th>
+                    <th>Nakshatra</th>
+                    <th>Pada</th>
+                    <th>Rasi</th>
+                    <th>Spiritual Status</th>
+                </tr>
+            </thead>
+            <tbody id="techBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Printable Report -->
+    <div id="printableReport">
+        <div class="report-header">
+            <h1 id="repTitleDisplay" class="editable" ondblclick="makeEditable(this)">Bāla Saṁskāra & Janma Doṣa Guide</h1>
+            <p id="repSubtitle" class="editable" ondblclick="makeEditable(this)">Developmental Milestones & Spiritual Protection Protocol</p>
+        </div>
+
+        <div class="summary-grid editable" id="birthDataBox" ondblclick="makeEditable(this)"></div>
+
+        <div class="section-header">Natal Sensitivity & Remedial Focus</div>
+        <div id="nakAnalysisBox" class="editable" ondblclick="makeEditable(this)"></div>
+
+        <div class="section-header">Śukla Saṁskāra: The Milestones of Growth</div>
+        <div class="samskara-container editable" id="samskaraBox" ondblclick="makeEditable(this)"></div>
+
+        <div class="section-header">Parental Best Practices</div>
+        <div class="best-practices editable" ondblclick="makeEditable(this)">
+            <p style="margin-bottom: 6px;"><strong>The Importance of Muhūrtha:</strong> While age-months provide the window, always consult a priest to choose a specific date with a strong Moon (Chandra-bala) to lock in the positive impact of the ceremony.</p>
+            <ul style="padding-left: 15px;">
+                <li><strong>Home Energy:</strong> A calm home directly impacts the baby's developing nervous system. Play Vedic chants or "Gandharva Veda" music daily.</li>
+                <li><strong>Nutrition:</strong> Use gold-infused honey/ghee (Swarnaprashana) as a natural immune and brain booster after consulting your Vaidya.</li>
+                <li><strong>Environment:</strong> In the 1st or 3rd month, let the baby see the Sun and Moon (Soorya/Chandra Darshana) to test visual focus and macular development.</li>
+            </ul>
+        </div>
+
+        <div id="repSigDisplay" class="sig-box editable" ondblclick="makeEditable(this)">
+            AstroGaami Jyotiṣa Sevā
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedGender = 'Male';
+    let processedData = null;
+
+    // Rich NAK_MAP: covers all JHora 4-char codes, 3-char variants,
+    // alternate spellings, and both old/new JHora version outputs.
+    const NAK_MAP = {
+        // ── Ashwini ────────────────────────────────────────────────────
+        'Aswi': 'Ashwini', 'Asvi': 'Ashwini', 'Asw': 'Ashwini', 'Asv': 'Ashwini',
+        // ── Bharani ───────────────────────────────────────────────────
+        'Bhar': 'Bharani', 'Bha': 'Bharani',
+        // ── Krittika ──────────────────────────────────────────────────
+        'Krit': 'Krittika', 'Kri': 'Krittika', 'Krtt': 'Krittika',
+        // ── Rohini ────────────────────────────────────────────────────
+        'Rohi': 'Rohini', 'Roh': 'Rohini',
+        // ── Mrigashira ────────────────────────────────────────────────
+        'Mrig': 'Mrigashira', 'Mrg': 'Mrigashira', 'Mris': 'Mrigashira', 'Mris': 'Mrigashira',
+        // ── Ardra ─────────────────────────────────────────────────────
+        'Ardr': 'Ardra', 'Ard': 'Ardra',
+        // ── Punarvasu ─────────────────────────────────────────────────
+        'Puna': 'Punarvasu', 'Pun': 'Punarvasu', 'Pnvs': 'Punarvasu',
+        // ── Pushya ────────────────────────────────────────────────────
+        'Push': 'Pushya', 'Pus': 'Pushya', 'Psh': 'Pushya',
+        // ── Ashlesha ──────────────────────────────────────────────────
+        'Asle': 'Ashlesha', 'Asre': 'Ashlesha', 'Ashl': 'Ashlesha', 'Ash': 'Ashlesha', 'Asl': 'Ashlesha',
+        // ── Magha ─────────────────────────────────────────────────────
+        'Magh': 'Magha', 'Mag': 'Magha',
+        // ── Purva Phalguni ────────────────────────────────────────────
+        'PPha': 'Purva Phalguni', 'PFal': 'Purva Phalguni', 'PPha': 'Purva Phalguni', 'PpFa': 'Purva Phalguni',
+        // ── Uttara Phalguni ───────────────────────────────────────────
+        'UPha': 'Uttara Phalguni', 'UFal': 'Uttara Phalguni', 'UpFa': 'Uttara Phalguni',
+        // ── Hasta ─────────────────────────────────────────────────────
+        'Hast': 'Hasta', 'Has': 'Hasta',
+        // ── Chitra ────────────────────────────────────────────────────
+        'Chit': 'Chitra', 'Chi': 'Chitra', 'Cit': 'Chitra',
+        // ── Swati ─────────────────────────────────────────────────────
+        'Swat': 'Swati', 'Swa': 'Swati', 'Swti': 'Swati',
+        // ── Vishakha ──────────────────────────────────────────────────
+        'Vish': 'Vishakha', 'Visa': 'Vishakha', 'Vis': 'Vishakha', 'Visk': 'Vishakha',
+        // ── Anuradha ──────────────────────────────────────────────────
+        'Anu': 'Anuradha', 'Anur': 'Anuradha', 'Anrd': 'Anuradha',
+        // ── Jyeshtha ──────────────────────────────────────────────────
+        'Jyes': 'Jyeshtha', 'Jye': 'Jyeshtha', 'Jyst': 'Jyeshtha', 'Jyst': 'Jyeshtha',
+        // ── Mula ──────────────────────────────────────────────────────
+        'Mool': 'Mula', 'Mula': 'Mula', 'Mul': 'Mula',
+        // ── Purva Ashadha ─────────────────────────────────────────────
+        'PSha': 'Purva Ashadha', 'PAsh': 'Purva Ashadha', 'PAsH': 'Purva Ashadha', 'Pash': 'Purva Ashadha',
+        // ── Uttara Ashadha ────────────────────────────────────────────
+        'USha': 'Uttara Ashadha', 'UAsh': 'Uttara Ashadha', 'UAsH': 'Uttara Ashadha', 'Uash': 'Uttara Ashadha',
+        // ── Shravana ──────────────────────────────────────────────────
+        'Srav': 'Shravana', 'Sra': 'Shravana', 'Shrv': 'Shravana', 'Srva': 'Shravana',
+        // ── Dhanishta ─────────────────────────────────────────────────
+        'Dhan': 'Dhanishta', 'Dha': 'Dhanishta', 'Dnis': 'Dhanishta',
+        // ── Shatabhisha ───────────────────────────────────────────────
+        'Sata': 'Shatabhisha', 'Sat': 'Shatabhisha', 'Shta': 'Shatabhisha', 'Stab': 'Shatabhisha',
+        // ── Purva Bhadrapada ──────────────────────────────────────────
+        'PBha': 'Purva Bhadrapada', 'PBha': 'Purva Bhadrapada', 'PbhP': 'Purva Bhadrapada',
+        // ── Uttara Bhadrapada ─────────────────────────────────────────
+        'UBha': 'Uttara Bhadrapada', 'UbhP': 'Uttara Bhadrapada',
+        // ── Revati ────────────────────────────────────────────────────
+        'Reva': 'Revati', 'Rev': 'Revati'
+    };
+
+    // Bug 6 fix: ensure report is visible before printing
+    function safePrint() {
+        const report = document.getElementById('printableReport');
+        if (report.style.display === 'none' || report.style.display === '') {
+            if (!processedData) return alert("Please analyze chart data and create the report before printing.");
+            generateFinalReport();
+        }
+        setTimeout(() => window.print(), 150);
+    }
+
+    function setGender(g) {
+        selectedGender = g;
+        document.getElementById('btnMale').classList.toggle('selected', g === 'Male');
+        document.getElementById('btnFemale').classList.toggle('selected', g === 'Female');
+    }
+
+    function makeEditable(element) {
+        // Bug 5 fix: only make the element editable if the dblclick landed
+        // directly on it (not bubbled up from a child) to prevent grid containers
+        // from collapsing when an inner <div> or <strong> is double-clicked.
+        element.contentEditable = "true";
+        element.style.cursor = "text";
+        // Give focus after a tick so the browser registers contentEditable
+        setTimeout(() => element.focus(), 0);
+        element.onblur = () => {
+            element.contentEditable = "false";
+            element.style.cursor = "";
+        };
+    }
+
+    function processData() {
+        const textA = document.getElementById('inputA').value.trim();
+        const textB = document.getElementById('inputB').value;
+        if (!textA) return alert("Please paste JHora longitudes.");
+
+        // Bug 8 fix: reset so stale data never persists on a re-run
+        processedData = null;
+
+        const PLANET_NAMES = ['Lagna','Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn','Rahu','Ketu'];
+        const planets = {};
+
+        textA.split('\n').forEach(rawLine => {
+            const line = rawLine.trim();
+            if (!line) return;
+            // Identify the planet name at the start of the line
+            const planet = PLANET_NAMES.find(p => new RegExp('^' + p + '(?=[\\s\\(\\-]|$)', 'i').test(line));
+            if (!planet) return;
+            // Strip: planet name | optional (R) | optional karaka annotation "- MK/BK/AK/..."
+            const body = line.slice(planet.length)
+                             .replace(/^\s*\(R\)/, '')
+                             .replace(/^\s*-\s*[A-Za-z\/]+/, '')
+                             .trim();
+            // Bug 1 fix: robust DMS match — handles "02' 37.49\"" and 3-OR-4-char nakshatra abbrevs
+            // Groups: 1=deg  2=signAbbr  3=min  4=sec  5=nakAbbr  6=pada  7=rasiAbbr
+            const m = body.match(/^(\d{1,2})\s+([A-Z][a-z])\s+(\d{1,2})'\s*([\d.]+)"\s+([A-Za-z]{3,5})\s+(\d)\s+([A-Z][a-z])/);
+            if (m) {
+                const nakFull = NAK_MAP[m[5]] || m[5]; // Bug 3 fix: normalise immediately; fallback is raw code
+                planets[planet] = { nak: nakFull, pada: parseInt(m[6], 10), rasi: m[7] };
+            }
+        });
+
+        // Bug 4 fix: inform user when parsing produced too few bodies
+        const count = Object.keys(planets).length;
+        if (count === 0) {
+            alert("⚠️ No planet data could be parsed.\n\nPlease check that Box A contains the 'Body Longitude' table copied directly from JHora (not a screenshot or reformatted text).");
+            return;
+        }
+        if (count < 5) {
+            const names = Object.keys(planets).join(', ');
+            if (!confirm(`Only ${count} planet(s) parsed (${names}).\nResults may be incomplete. Continue?`)) return;
+        }
+
+        // Bug 7 fix: extended Tithi regex handles "Shukla 1", "S-1", "Krishna Ashtami (..." etc.
+        const dobMatch     = textB.match(/Date:\s+([A-Za-z]+\s+\d+,\s+\d{4})/);
+        const weekdayMatch = textB.match(/Vedic Weekday:\s+([A-Za-z]+)/);
+        const tithiMatch   = textB.match(/Tithi:\s+([A-Za-z0-9\s\-\.]+?)(?:\s*\(|\n|$)/m);
+        // Auto-parse Time of Birth — handles "Time: 10:35:22", "Time: 10:35 AM", "Birth Time: ..."
+        const timeMatch    = textB.match(/(?:Birth\s+)?Time:\s*([\d]{1,2}:[\d]{2}(?::[\d]{2})?(?:\s*[APap][Mm])?)/);
+        // Auto-parse Place of Birth — handles "Place: Hyderabad", "Location: ...", "City: ..."
+        const placeMatch   = textB.match(/(?:Place|Location|City):\s*([^\n,]+(?:,\s*[^\n]+)?)/i);
+
+        processedData = {
+            planets,
+            dob:     dobMatch     ? dobMatch[1]          : "N/A",
+            weekday: weekdayMatch ? weekdayMatch[1]       : "N/A",
+            tithi:   tithiMatch   ? tithiMatch[1].trim() : "Unknown",
+            birthTime:  timeMatch  ? timeMatch[1].trim()  : "N/A",
+            birthPlace: placeMatch ? placeMatch[1].trim() : "N/A"
+        };
+
+        const tbody = document.getElementById('techBody');
+        tbody.innerHTML = '';
+        Object.keys(planets).forEach(p => {
+            const item = planets[p];
+            const meta = getStatus(p, item.nak, item.pada);
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p}</td>
+                    <td>${item.nak}</td>
+                    <td>${item.pada}</td>
+                    <td>${item.rasi}</td>
+                    <td><span class="status-pill ${meta.color}" title="${meta.tip}">${meta.label}</span></td>
+                </tr>`;
+        });
+        document.getElementById('techSummary').style.display = 'block';
+    }
+
+    function getStatus(p, nak, pada) {
+        const isGandanta = ((nak === 'Ashwini' && pada === 1) || (nak === 'Revati' && pada === 4) ||
+                            (nak === 'Magha' && pada === 1) || (nak === 'Ashlesha' && pada === 4) ||
+                            (nak === 'Mula' && pada === 1) || (nak === 'Jyeshtha' && pada === 4));
+        
+        if (isGandanta) return { label: 'Gandanta', color: 'bg-bad', tip: 'Spiritual Junction Point. High priority for Muhurtha based remedies.' };
+        if (['Mula', 'Ashlesha', 'Jyeshtha'].includes(nak)) return { label: 'Sensitive', color: 'bg-mixed', tip: 'Higher intensity energy. Requires steady prayer/mantra.' };
+        return { label: 'Supportive', color: 'bg-good', tip: 'Naturally stable energy.' };
+    }
+
+    function generateFinalReport() {
+        if (!processedData || Object.keys(processedData.planets).length === 0) return alert("Please analyze valid chart data first (Step 1).");
+        
+        document.getElementById('repTitleDisplay').innerText = document.getElementById('appTitleInput').value;
+        document.getElementById('repSigDisplay').innerText = document.getElementById('appSigInput').value;
+
+        const moon = processedData.planets.Moon || {nak: 'N/A', pada: '?'};
+        document.getElementById('birthDataBox').innerHTML = `
+            <div class="summary-item"><strong>Child Name</strong>${document.getElementById('childName').value || "Unnamed Child"}</div>
+            <div class="summary-item"><strong>Gender</strong>${selectedGender}</div>
+            <div class="summary-item"><strong>Janma Nakshatra</strong>${moon.nak} (Pāda ${moon.pada})</div>
+            <div class="summary-item"><strong>Date of Birth</strong>${processedData.dob} (${processedData.weekday})</div>
+            <div class="summary-item"><strong>Time of Birth</strong>${processedData.birthTime}</div>
+            <div class="summary-item"><strong>Place of Birth</strong>${processedData.birthPlace}</div>
+        `;
+
+        let nakHtml = '';
+        Object.keys(processedData.planets).forEach(p => {
+            const item = processedData.planets[p];
+            const meta = getStatus(p, item.nak, item.pada);
+            if(meta.label !== 'Supportive') {
+                nakHtml += `<div class="dosha-card" style="font-size:11px; padding:10px; margin-bottom:8px;">
+                    <strong style="color:var(--clay)">${meta.label} Influence: ${p} (${item.nak})</strong> - ${meta.tip}
+                </div>`;
+            }
+        });
+        document.getElementById('nakAnalysisBox').innerHTML = nakHtml || "<p style='font-size:11px'>Natal energies are exceptionally stable across all points.</p>";
+
+        const isMale = selectedGender === 'Male';
+        const foodMonth = isMale ? "6th Month" : "5th Month";
+        
+        document.getElementById('samskaraBox').innerHTML = `
+            <div class="samskara-card">
+                <span class="age-tag">Neonatal (Day 11-12)</span>
+                <h4>Nāmakaraṇa (Naming)</h4>
+                <p>The first public announcement of identity. Establishes healthy psychology and social bond.</p>
+            </div>
+            <div class="samskara-card">
+                <span class="age-tag">Age: 4th Month</span>
+                <h4>Niṣkramaṇa (Environment)</h4>
+                <p>First exposure to the world. Check: Neck holding, social smile, and eye tracking.</p>
+            </div>
+            <div class="samskara-card">
+                <span class="age-tag">Age: ${foodMonth}</span>
+                <h4>Annaprāśana (First Grain)</h4>
+                <p>Transition to solids. Check: Ability to sit with support (Upaveshana) and hand-eye coordination.</p>
+            </div>
+            <div class="samskara-card">
+                <span class="age-tag">Age: 6th to 8th Month</span>
+                <h4>Karṇavedha (Ear Piercing)</h4>
+                <p>Activation of nervous system & immunity. Pricking specific points aids in respiratory health.</p>
+            </div>
+            <div class="samskara-card">
+                <span class="age-tag">Age: Year 1 or 3</span>
+                <h4>Cūḍākaraṇa (Tonsure)</h4>
+                <p>Shaving the head to assess skull growth (fontanelles) and clear old karmic energy patterns.</p>
+            </div>
+            <div class="samskara-card">
+                <span class="age-tag">Age: Year 5 to 8</span>
+                <h4>Upanayana / Vedarambha</h4>
+                <p>Initiation into formal learning and focus. Marks the end of early childhood brain growth.</p>
+            </div>
+        `;
+
+        document.getElementById('printableReport').style.display = 'block';
+        window.scrollTo({ top: document.getElementById('printableReport').offsetTop, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
